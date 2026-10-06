@@ -1,4 +1,6 @@
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
+
 
 import {
   Image,
@@ -13,6 +15,7 @@ import {
 } from 'react-native';
 
 export default function App() {
+  const router = useRouter();
 
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -25,7 +28,7 @@ export default function App() {
       return;
     }
 
-    console.log('Login realizado!');
+    router.push('/home');
     console.log('E-mail:', email);
     console.log('Senha:', senha);
   }
@@ -151,7 +154,7 @@ export default function App() {
           >
 
             <Text style={styles.registerLink}>
-              Criar conta
+              CRIAR CONTA
             </Text>
 
           </TouchableOpacity>
@@ -166,7 +169,7 @@ export default function App() {
           </Text>
 
           <Text style={styles.footerText}>
-            Todos os direitos reservados.
+            
           </Text>
 
         </View>
