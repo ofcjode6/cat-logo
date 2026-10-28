@@ -1,11 +1,13 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { produtos } from "../data/produtos";
 
 import {
+  Alert,
   FlatList,
   Image,
-  SafeAreaView,
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -178,10 +180,14 @@ export default function Home() {
   pagingEnabled
   showsHorizontalScrollIndicator={false}
   keyExtractor={(_, index) => index.toString()}
+  style={{ width: 280 }}
   renderItem={({ item }) => (
     <Image
       source={item}
-      style={styles.productImage}
+      style={{
+        width: 210,
+        height: 210,
+      }}
       resizeMode="cover"
     />
   )}
@@ -326,41 +332,53 @@ export default function Home() {
 
       </ScrollView>
 
-      {/* ================= BARRA INFERIOR ================= */}
 
-      <View style={styles.bottomBar}>
+{/* ================= BARRA INFERIOR ================= */}
 
-        <TouchableOpacity style={styles.bottomItem}>
-          <Text style={styles.bottomIcon}>⌂</Text>
-          <Text style={styles.bottomTextActive}>
-            Início
-          </Text>
-        </TouchableOpacity>
+<View style={styles.bottomBar}>
 
-        <TouchableOpacity style={styles.bottomItem}>
-          <Text style={styles.bottomIcon}>▦</Text>
-          <Text style={styles.bottomText}>
-            Catálogo
-          </Text>
-        </TouchableOpacity>
+  <TouchableOpacity
+    style={styles.bottomItem}
+    onPress={() => router.push('/home')}
+  >
+    <Text style={styles.bottomIcon}>⌂</Text>
+    <Text style={styles.bottomTextActive}>Início</Text>
+  </TouchableOpacity>
 
-        <TouchableOpacity style={styles.bottomItem}>
-          <Text style={styles.bottomIcon}>◉</Text>
-          <Text style={styles.bottomText}>
-            Nosso WhatsApp
-          </Text>
-        </TouchableOpacity>
+  <TouchableOpacity
+    style={styles.bottomItem}
+    onPress={() => router.push('/home')}
+  >
+    <Text style={styles.bottomIcon}>▦</Text>
+    <Text style={styles.bottomText}>Catálogo</Text>
+  </TouchableOpacity>
 
-        <TouchableOpacity style={styles.bottomItem}>
-          <Text style={styles.bottomIcon}>●</Text>
-          <Text style={styles.bottomText}>
-            Perfil
-          </Text>
-        </TouchableOpacity>
+  <TouchableOpacity
+    style={styles.bottomItem}
+    onPress={() => router.push('/favoritos')}
+  >
+    <Text style={styles.bottomIcon}>♡</Text>
+    <Text style={styles.bottomText}>Favoritos</Text>
+  </TouchableOpacity>
 
-      </View>
+  <TouchableOpacity
+    style={styles.bottomItem}
+    onPress={() => Linking.openURL('https://wa.me/')}
+  >
+    <Text style={styles.bottomIcon}>◉</Text>
+    <Text style={styles.bottomText}>WhatsApp</Text>
+  </TouchableOpacity>
 
-    </SafeAreaView>
+  <TouchableOpacity
+    style={styles.bottomItem}
+    onPress={() => Alert.alert('Perfil', 'O perfil estará disponível em uma futura atualização.')}
+  >
+    <Text style={styles.bottomIcon}>●</Text>
+    <Text style={styles.bottomText}>Perfil</Text>
+  </TouchableOpacity>
+
+</View>
+  </SafeAreaView>
   );
 }
 
@@ -381,16 +399,16 @@ const styles = StyleSheet.create({
 
   /* HEADER */
 
-  header: {
-    height: 85,
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottomWidth: 1,
-    borderBottomColor: '#2A2A2A',
-  },
-
+ header: {
+  minHeight: 85,
+  paddingHorizontal: 20,
+  paddingVertical: 12,
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  borderBottomWidth: 1,
+  borderBottomColor: '#2A2A2A',
+     },
   logo: {
     width: 155,
     height: 60,

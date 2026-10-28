@@ -1,21 +1,28 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-    Image,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  Image,
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+import { contatoLoja } from '../config/contato';
 
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFavoritos } from '../context/Favortitoscontext';
 import { produtos } from '../data/produtos';
+import { registrarSolicitacao } from '../database/database';
 
 export default function Produto() {
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { alternarFavorito, isFavorito } = useFavoritos();
 
-  const produto = produtos.find(
+  const produto = produtos.find( 
     (item) => item.id.toString() === id?.toString()
   );
 
@@ -39,6 +46,59 @@ export default function Produto() {
       </SafeAreaView>
     );
   }
+  
+
+const abrirWhatsApp = async () => {
+  if (!contatoLoja.whatsapp) {
+    Alert.alert(
+      'WhatsApp indisponível',
+      'O contato da loja ainda não foi configurado. Tente novamente mais tarde.'
+    );
+    return;
+  }
+
+  const mensagem =
+    `Olá! Tenho interesse neste produto da Mareli Multimarcas.\n\n` +
+    `Produto: ${produto!.nome}\n` +
+    `Preço: ${produto!.preco}`;
+
+  const url =
+    `https://wa.me/${contatoLoja.whatsapp}?text=${encodeURIComponent(mensagem)}`;
+
+  try {
+    await Linking.openURL(url);
+  } catch {
+    Alert.alert(
+      'Erro',
+      'Não foi possível abrir o WhatsApp neste dispositivo.'
+    );
+  }
+};
+
+
+async function registrarInteresse() {
+  try {
+    const idRegistro = await registrarSolicitacao(
+      produto!.id,
+      produto!.nome
+    );
+
+    console.log('Interesse registrado. ID:', idRegistro);
+    
+
+    await abrirWhatsApp();
+  } catch (erro) {
+    console.error('Erro ao registrar interesse:', erro);
+
+    Alert.alert(
+      'Erro',
+      'Não foi possível registrar seu interesse. Tente novamente.'
+    );
+  }
+}
+
+
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -61,11 +121,22 @@ export default function Produto() {
 
         {/* IMAGEM DO PRODUTO */}
 
-        <Image
-          source={produto.imagens[0]}
-          style={styles.productImage}
-          resizeMode="cover"
-        />
+        
+      <FlatList
+        data={produto.imagens}
+         horizontal
+         pagingEnabled
+         showsHorizontalScrollIndicator={false}
+         keyExtractor={(_, index) => index.toString()}
+         renderItem={({ item }) => (
+           <Image
+            source={item}
+            style={styles.productImage}
+            resizeMode="cover"
+       />
+  )}
+/>
+
 
         {/* INFORMAÇÕES */}
 
@@ -82,6 +153,15 @@ export default function Produto() {
           <Text style={styles.price}>
             {produto.preco}
           </Text>
+
+          <TouchableOpacity
+            style={styles.favoriteButton}
+             onPress={() => alternarFavorito(produto.id)}
+                               >
+             <Text style={styles.favoriteText}>
+             {isFavorito(produto.id) ? '♥ Remover dos favoritos' : '♡ Adicionar aos favoritos'}
+             </Text>
+</TouchableOpacity>
 
           {produto.oferta && (
             <View style={styles.offerTag}>
@@ -102,11 +182,16 @@ export default function Produto() {
             Mareli Multimarcas.
           </Text>
 
-          <TouchableOpacity style={styles.whatsappButton}>
-            <Text style={styles.whatsappText}>
-              Tenho interesse neste produto
-            </Text>
-          </TouchableOpacity>
+         
+          <TouchableOpacity
+  style={styles.whatsappButton}
+  onPress={registrarInteresse}
+>
+  <Text style={styles.whatsappText}>
+    Tenho interesse neste produto
+  </Text>
+</TouchableOpacity>
+ 
 
         </View>
 
@@ -129,6 +214,7 @@ const styles = StyleSheet.create({
 
   backButton: {
     paddingHorizontal: 20,
+    paddingTop: 12,
     paddingVertical: 18,
   },
 
@@ -139,9 +225,9 @@ const styles = StyleSheet.create({
   },
 
   productImage: {
-    width: '100%',
-    height: 430,
-  },
+  width: 380,
+  height: 430,
+},
 
   infoContainer: {
     padding: 20,
@@ -167,6 +253,22 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginTop: 12,
   },
+
+  favoriteButton: {
+  alignSelf: 'flex-start',
+  borderWidth: 1,
+  borderColor: '#C9A96E',
+  borderRadius: 8,
+  paddingHorizontal: 14,
+  paddingVertical: 10,
+  marginTop: 15,
+},
+
+favoriteText: {
+  color: '#C9A96E',
+  fontSize: 14,
+  fontWeight: '600',
+},
 
   offerTag: {
     alignSelf: 'flex-start',
